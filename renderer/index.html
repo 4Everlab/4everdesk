@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="Content-Security-Policy"
+      content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src ws: wss:; media-src 'self' blob:;" />
+    <title>4EverDesk</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <!-- Arka plan dekoru -->
+    <div class="bg-decor">
+      <div class="glow glow-a"></div>
+      <div class="glow glow-b"></div>
+      <div class="grid-lines"></div>
+    </div>
+
+    <!-- Güncelleme bandı -->
+    <div id="update-bar" class="update-bar hidden">
+      <span id="update-text">Yeni sürüm hazırlanıyor...</span>
+      <button id="update-action" class="update-btn hidden">Yeniden başlat & güncelle</button>
+    </div>
+
+    <!-- ============ ÜST BAR ============ -->
+    <header class="topbar">
+      <div class="brand">
+        <img src="../logo.png" alt="4EverDesk" class="brand-logo" />
+        <span class="brand-sub">Desk</span>
+      </div>
+      <div class="topbar-right">
+        <div class="status" id="status-pill">
+          <span id="conn-dot" class="dot"></span>
+          <span id="conn-text">Baglaniyor...</span>
+        </div>
+        <button id="open-settings" class="icon-btn" title="Ayarlar" aria-label="Ayarlar">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- ============ ANA EKRAN ============ -->
+    <div id="home" class="screen">
+      <main class="home-grid">
+        <section class="card card-id">
+          <div class="card-head">
+            <h2>Kimliğin</h2>
+            <span class="badge badge-ready"><span class="dot dot-green"></span> Kontrole hazır</span>
+          </div>
+          <p class="muted">Bu numarayı karşı tarafa ver, bilgisayarını kontrol edebilsin.</p>
+          <div class="id-display">
+            <span id="my-id" class="id-number">— — —</span>
+          </div>
+          <div class="id-actions">
+            <button id="copy-id" class="ghost full">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              <span id="copy-label">Kimliği kopyala</span>
+            </button>
+          </div>
+        </section>
+
+        <section class="card card-connect">
+          <div class="card-head">
+            <h2>Uzaktan Bağlan</h2>
+          </div>
+          <p class="muted">Bağlanmak istediğin bilgisayarın 9 haneli kimliğini gir.</p>
+          <input
+            id="peer-id"
+            class="id-input"
+            inputmode="numeric"
+            maxlength="11"
+            placeholder="123 456 789"
+            autocomplete="off"
+          />
+          <button id="connect-btn" class="primary full">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            Bağlan
+          </button>
+        </section>
+      </main>
+
+      <footer class="foot">
+        <span>4Ever Labs · <a href="https://4everlabs.com" id="site-link">4everlabs.com</a></span>
+        <span id="app-version" class="ver"></span>
+      </footer>
+    </div>
+
+    <!-- ============ GELEN İSTEK ============ -->
+    <div id="incoming" class="screen hidden overlay">
+      <div class="modal pop">
+        <img src="../icon.png" class="modal-icon" alt="" />
+        <h2>Gelen Bağlantı İsteği</h2>
+        <p class="muted"><span id="incoming-id" class="mono"></span> bilgisayarını kontrol etmek istiyor.</p>
+        <p class="warn-note">Yalnızca tanıdığın biriyse kabul et. Karşı taraf faren ve klavyeni kontrol edebilecek.</p>
+        <div class="modal-actions">
+          <button id="reject-btn" class="ghost">Reddet</button>
+          <button id="accept-btn" class="primary">Kabul Et</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ KONTROL EDİLİYOR ============ -->
+    <div id="serving" class="screen hidden">
+      <div class="serving-box">
+        <div class="pulse-ring"><img src="../icon.png" class="serving-icon" alt="" /></div>
+        <h2>Bilgisayarın kontrol ediliyor</h2>
+        <p class="muted"><span id="serving-id" class="mono"></span> şu anda bağlı.</p>
+        <button id="stop-serving" class="danger">Bağlantıyı Kes</button>
+      </div>
+    </div>
+
+    <!-- ============ UZAK EKRAN ============ -->
+    <div id="remote" class="screen hidden">
+      <div class="remote-bar">
+        <span class="remote-title">
+          <span class="live-dot"></span>
+          Uzak Masaüstü · <span id="remote-id" class="mono"></span>
+        </span>
+        <span id="remote-stat" class="muted">Bağlanıyor...</span>
+        <div class="remote-tools">
+          <button id="fullscreen-btn" class="icon-btn" title="Tam ekran">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3m13-5v3a2 2 0 0 1-2 2h-3"/></svg>
+          </button>
+          <button id="disconnect-btn" class="danger small">Ayrıl</button>
+        </div>
+      </div>
+      <div class="video-wrap">
+        <video id="remote-video" autoplay playsinline></video>
+        <div id="remote-loading" class="remote-loading">
+          <div class="spinner"></div>
+          <span>Uzak ekrana bağlanılıyor...</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ AYARLAR ============ -->
+    <div id="settings" class="screen hidden overlay">
+      <div class="modal pop">
+        <h2>Ayarlar</h2>
+        <label class="field-label" for="server-url">Sunucu adresi (signaling)</label>
+        <input id="server-url" class="text-input" placeholder="wss://signal.4everlabs.com" autocomplete="off" />
+        <p class="field-hint">Farklı bir signaling sunucusu kullanmak için değiştir. Boş bırakırsan varsayılan kullanılır.</p>
+        <div class="modal-actions">
+          <button id="settings-cancel" class="ghost">Vazgeç</button>
+          <button id="settings-save" class="primary">Kaydet & Yenile</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast bildirimleri -->
+    <div id="toasts" class="toasts"></div>
+
+    <script src="config.js"></script>
+    <script src="renderer.js"></script>
+  </body>
+</html>

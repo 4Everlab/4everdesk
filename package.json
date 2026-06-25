@@ -1,0 +1,96 @@
+{
+  "name": "4everdesk",
+  "version": "1.0.0",
+  "description": "4EverDesk - Basit uzaktan masaüstü bağlantısı (9 haneli ID)",
+  "main": "main.js",
+  "author": {
+    "name": "4Ever Labs",
+    "email": "contact@4everlabs.com"
+  },
+  "homepage": "https://4everlabs.com/4everdesk",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/4Everlab/4everdesk.git"
+  },
+  "scripts": {
+    "start": "electron .",
+    "server": "node server/server.js",
+    "rebuild": "electron-rebuild -f -w @nut-tree-fork/nut-js",
+    "postinstall": "electron-rebuild -f -w @nut-tree-fork/nut-js || echo \"nut.js rebuild atlandi - kontrol ozelligi devre disi olabilir\"",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder",
+    "dist:win": "electron-builder --win",
+    "dist:mac": "electron-builder --mac"
+  },
+  "dependencies": {
+    "@nut-tree-fork/nut-js": "^4.2.0",
+    "electron-updater": "^6.3.9",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "electron": "^33.0.0",
+    "@electron/rebuild": "^3.7.0",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "com.4everlabs.desk",
+    "productName": "4EverDesk",
+    "copyright": "Copyright © 2026 4Ever Labs",
+    "directories": {
+      "buildResources": "build",
+      "output": "release"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "keymap.js",
+      "renderer/**/*",
+      "icon.png",
+      "logo.png",
+      "!server/**/*"
+    ],
+    "asarUnpack": [
+      "**/node_modules/@nut-tree-fork/**"
+    ],
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "4Everlab",
+        "repo": "4everdesk",
+        "releaseType": "release"
+      }
+    ],
+    "win": {
+      "target": [
+        { "target": "nsis", "arch": ["x64"] }
+      ],
+      "icon": "build/icon.png",
+      "artifactName": "4EverDesk-Setup-${version}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "4EverDesk"
+    },
+    "mac": {
+      "target": [
+        { "target": "dmg", "arch": ["x64", "arm64"] },
+        { "target": "zip", "arch": ["x64", "arm64"] }
+      ],
+      "icon": "build/icon.png",
+      "category": "public.app-category.utilities",
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false,
+      "entitlements": "build/entitlements.mac.plist",
+      "entitlementsInherit": "build/entitlements.mac.plist",
+      "artifactName": "4EverDesk-${version}-${arch}.${ext}"
+    },
+    "dmg": {
+      "title": "4EverDesk ${version}"
+    }
+  }
+}

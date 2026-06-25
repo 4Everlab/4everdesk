@@ -1,0 +1,63 @@
+name: Build & Release
+
+# v ile baslayan bir tag push edildiginde (orn. v1.0.0) calisir.
+# Hem macOS hem Windows kurulumlarini olusturup GitHub Releases'e yukler.
+# Boylece otomatik guncelleme (electron-updater) bu release'leri gorur.
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch: # elle de tetiklenebilir
+
+permissions:
+  contents: write # GITHUB_TOKEN'in release olusturabilmesi icin
+
+jobs:
+  build-mac:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build & publish (macOS)
+        run: npm run dist:mac -- --publish always
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # --- macOS imzalama (Apple Developer) ---
+          # Sertifikan yoksa bu secret'lar bos kalir, imzasiz build uretilir.
+          CSC_LINK: ${{ secrets.MAC_CSC_LINK }}
+          CSC_KEY_PASSWORD: ${{ secrets.MAC_CSC_KEY_PASSWORD }}
+          # --- Notarization (Apple) ---
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+
+  build-win:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build & publish (Windows)
+        run: npm run dist:win -- --publish always
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # --- Windows imzalama (code-signing) ---
+          # Sertifikan yoksa bu secret'lar bos kalir, imzasiz build uretilir.
+          CSC_LINK: ${{ secrets.WIN_CSC_LINK }}
+          CSC_KEY_PASSWORD: ${{ secrets.WIN_CSC_KEY_PASSWORD }}
