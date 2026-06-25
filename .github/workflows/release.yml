@@ -32,7 +32,8 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # --- macOS imzalama (Apple Developer) ---
-          # Sertifikan yoksa bu secret'lar bos kalir, imzasiz build uretilir.
+          # Sertifika secret'i tanimliysa imzala; degilse imzalamayi atla (imzasiz build).
+          CSC_IDENTITY_AUTO_DISCOVERY: ${{ secrets.MAC_CSC_LINK != '' && 'true' || 'false' }}
           CSC_LINK: ${{ secrets.MAC_CSC_LINK }}
           CSC_KEY_PASSWORD: ${{ secrets.MAC_CSC_KEY_PASSWORD }}
           # --- Notarization (Apple) ---
@@ -58,6 +59,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # --- Windows imzalama (code-signing) ---
-          # Sertifikan yoksa bu secret'lar bos kalir, imzasiz build uretilir.
+          # Sertifika secret'i tanimliysa imzala; degilse imzalamayi atla (imzasiz build).
+          CSC_IDENTITY_AUTO_DISCOVERY: ${{ secrets.WIN_CSC_LINK != '' && 'true' || 'false' }}
           CSC_LINK: ${{ secrets.WIN_CSC_LINK }}
           CSC_KEY_PASSWORD: ${{ secrets.WIN_CSC_KEY_PASSWORD }}
