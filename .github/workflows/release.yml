@@ -38,9 +38,23 @@ jobs:
             echo "Sertifika bulundu - imzalanacak."
             echo "CSC_LINK=${{ secrets.MAC_CSC_LINK }}" >> "$GITHUB_ENV"
             echo "CSC_KEY_PASSWORD=${{ secrets.MAC_CSC_KEY_PASSWORD }}" >> "$GITHUB_ENV"
-            echo "APPLE_ID=${{ secrets.APPLE_ID }}" >> "$GITHUB_ENV"
-            echo "APPLE_APP_SPECIFIC_PASSWORD=${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}" >> "$GITHUB_ENV"
-            echo "APPLE_TEAM_ID=${{ secrets.APPLE_TEAM_ID }}" >> "$GITHUB_ENV"
+
+            # Notarization - YONTEM 1: App Store Connect API Key (onerilen)
+            if [ -n "${{ secrets.APPLE_API_KEY_ID }}" ]; then
+              echo "Notarization: App Store Connect API Key kullanilacak."
+              echo "${{ secrets.APPLE_API_KEY_B64 }}" | base64 --decode > "$RUNNER_TEMP/asc_api_key.p8"
+              echo "APPLE_API_KEY=$RUNNER_TEMP/asc_api_key.p8" >> "$GITHUB_ENV"
+              echo "APPLE_API_KEY_ID=${{ secrets.APPLE_API_KEY_ID }}" >> "$GITHUB_ENV"
+              echo "APPLE_API_ISSUER=${{ secrets.APPLE_API_ISSUER }}" >> "$GITHUB_ENV"
+            # Notarization - YONTEM 2: Apple ID + app-specific password
+            elif [ -n "${{ secrets.APPLE_ID }}" ]; then
+              echo "Notarization: Apple ID + app-specific password kullanilacak."
+              echo "APPLE_ID=${{ secrets.APPLE_ID }}" >> "$GITHUB_ENV"
+              echo "APPLE_APP_SPECIFIC_PASSWORD=${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}" >> "$GITHUB_ENV"
+              echo "APPLE_TEAM_ID=${{ secrets.APPLE_TEAM_ID }}" >> "$GITHUB_ENV"
+            else
+              echo "Notarization secret'i yok - imzali ama notarize edilmemis build."
+            fi
           else
             echo "Sertifika yok - imzasiz build uretilecek."
             echo "CSC_IDENTITY_AUTO_DISCOVERY=false" >> "$GITHUB_ENV"
