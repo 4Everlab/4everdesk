@@ -3,15 +3,19 @@ name: Build & Release
 # v ile baslayan bir tag push edildiginde (orn. v1.0.0) calisir.
 # Hem macOS hem Windows kurulumlarini olusturup GitHub Releases'e yukler.
 # Boylece otomatik guncelleme (electron-updater) bu release'leri gorur.
+#
+# IMZALAMA: ilgili secret'lar tanimliysa imzalar; degilse imzasiz build uretir.
+#   (Secret'i bos string olarak gecmek electron-builder'i bozdugu icin
+#    degiskenler yalnizca secret mevcutsa $GITHUB_ENV'e yazilir.)
 
 on:
   push:
     tags:
       - "v*"
-  workflow_dispatch: # elle de tetiklenebilir
+  workflow_dispatch:
 
 permissions:
-  contents: write # GITHUB_TOKEN'in release olusturabilmesi icin
+  contents: write
 
 jobs:
   build-mac:
@@ -27,19 +31,25 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Configure macOS signing
+        shell: bash
+        run: |
+          if [ -n "${{ secrets.MAC_CSC_LINK }}" ]; then
+            echo "Sertifika bulundu - imzalanacak."
+            echo "CSC_LINK=${{ secrets.MAC_CSC_LINK }}" >> "$GITHUB_ENV"
+            echo "CSC_KEY_PASSWORD=${{ secrets.MAC_CSC_KEY_PASSWORD }}" >> "$GITHUB_ENV"
+            echo "APPLE_ID=${{ secrets.APPLE_ID }}" >> "$GITHUB_ENV"
+            echo "APPLE_APP_SPECIFIC_PASSWORD=${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}" >> "$GITHUB_ENV"
+            echo "APPLE_TEAM_ID=${{ secrets.APPLE_TEAM_ID }}" >> "$GITHUB_ENV"
+          else
+            echo "Sertifika yok - imzasiz build uretilecek."
+            echo "CSC_IDENTITY_AUTO_DISCOVERY=false" >> "$GITHUB_ENV"
+          fi
+
       - name: Build & publish (macOS)
         run: npm run dist:mac -- --publish always
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # --- macOS imzalama (Apple Developer) ---
-          # Sertifika secret'i tanimliysa imzala; degilse imzalamayi atla (imzasiz build).
-          CSC_IDENTITY_AUTO_DISCOVERY: ${{ secrets.MAC_CSC_LINK != '' && 'true' || 'false' }}
-          CSC_LINK: ${{ secrets.MAC_CSC_LINK }}
-          CSC_KEY_PASSWORD: ${{ secrets.MAC_CSC_KEY_PASSWORD }}
-          # --- Notarization (Apple) ---
-          APPLE_ID: ${{ secrets.APPLE_ID }}
-          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
 
   build-win:
     runs-on: windows-latest
@@ -54,12 +64,19 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Configure Windows signing
+        shell: bash
+        run: |
+          if [ -n "${{ secrets.WIN_CSC_LINK }}" ]; then
+            echo "Sertifika bulundu - imzalanacak."
+            echo "CSC_LINK=${{ secrets.WIN_CSC_LINK }}" >> "$GITHUB_ENV"
+            echo "CSC_KEY_PASSWORD=${{ secrets.WIN_CSC_KEY_PASSWORD }}" >> "$GITHUB_ENV"
+          else
+            echo "Sertifika yok - imzasiz build uretilecek."
+            echo "CSC_IDENTITY_AUTO_DISCOVERY=false" >> "$GITHUB_ENV"
+          fi
+
       - name: Build & publish (Windows)
         run: npm run dist:win -- --publish always
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # --- Windows imzalama (code-signing) ---
-          # Sertifika secret'i tanimliysa imzala; degilse imzalamayi atla (imzasiz build).
-          CSC_IDENTITY_AUTO_DISCOVERY: ${{ secrets.WIN_CSC_LINK != '' && 'true' || 'false' }}
-          CSC_LINK: ${{ secrets.WIN_CSC_LINK }}
-          CSC_KEY_PASSWORD: ${{ secrets.WIN_CSC_KEY_PASSWORD }}
