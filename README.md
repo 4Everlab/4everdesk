@@ -85,13 +85,15 @@ npm run dist:mac   # macOS    -> release/4EverDesk-<sürüm>-<arch>.dmg  (yalnı
 
 ## Signaling sunucusunu deploy etme
 
-İnternet üzerinden çalışması için `server/server.js` bir sunucuda (TLS ile) çalışmalı.
-Varsayılan adres `wss://signal.4everlabs.com` ([renderer/config.js](renderer/config.js)).
+Üretimde signaling, **4EverLabs web sitesine entegre edilmiştir**: site sunucusu
+(Next.js özel `server.js`) hem web'i hem de `wss://4everlabs.com/signal` WebSocket
+signaling'ini tek portta servis eder ([renderer/config.js](renderer/config.js)).
+
+Yerel/bağımsız çalıştırmak istersen `server/server.js` tek başına da çalışır:
 
 ```bash
-# sunucuda
 PORT=9000 node server/server.js
-# önüne TLS sonlandıran bir reverse proxy (Nginx/Caddy) koy -> wss://
+# önüne TLS sonlandıran bir reverse proxy (Nginx/Caddy) koyup wss:// olarak yayınla
 ```
 
 Zor ağlarda (çift NAT) bağlantı kurulamazsa `config.js` içindeki `ICE_SERVERS`
